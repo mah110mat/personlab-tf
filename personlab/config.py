@@ -2,8 +2,10 @@ import numpy as np
 
 
 
-TAR_H = 401
-TAR_W = 401
+#TAR_H = 401
+#TAR_W = 401
+TAR_H = 257
+TAR_W = 257
 
 WORKER_SIZE = 8
 IN_QUEUE_SIZE = 20
@@ -24,6 +26,8 @@ STRIDE = 8
 KP_PEAK_LB = 5
 KP_LINK_DIST = 16
 KP_DUPLICATE_DIST = 8
+
+LEARNING_RATE = 1e-4 
 
 KP_NAMES = [
     'nose',

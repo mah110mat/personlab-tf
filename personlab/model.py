@@ -51,30 +51,33 @@ def train(model_func, data_generator, checkpoint_path, log_dir):
                              lo_x_pred, lo_y_pred, \
                              tf.tile(tensors['seg'], (1, 1, 1, config.NUM_KP)))
 
-    total_loss = hm_loss * 4.0 + seg_loss * 2.0 + so_loss * 1.0 + mo_loss * 0.25 + lo_loss * 0.125
+    total_loss = hm_loss * 4.0 + so_loss * 1.0 + mo_loss * 0.25 + seg_loss * 2.0 + lo_loss * 0.125
 
     b_i = 0
     args = [tensors['image'], hm_pred, tensors['hm'], so_x_pred, so_y_pred]
     args = [tf.cast(x[b_i], tf.float32) for x in args]
     offset_summary = tf.py_func(display.offset_summary, args, tf.float32)
     offset_summary.set_shape([None, None, 4])
-    tf.summary.image('sum', tf.expand_dims(offset_summary, 0))
-    tf.summary.scalar('losses/hm_loss', hm_loss)
-    tf.summary.scalar('losses/seg_loss', seg_loss)
-    tf.summary.scalar('losses/so_loss', so_loss)
-    tf.summary.scalar('losses/mo_loss', mo_loss)
-    tf.summary.scalar('losses/lo_loss', lo_loss)
-    tf.summary.scalar('losses/total_loss', total_loss)
+    tf.compat.v1.summary.image('sum', tf.expand_dims(offset_summary, 0))
+    tf.compat.v1.summary.scalar('losses/hm_loss', hm_loss)
+    tf.compat.v1.summary.scalar('losses/seg_loss', seg_loss)
+    tf.compat.v1.summary.scalar('losses/so_loss', so_loss)
+    tf.compat.v1.summary.scalar('losses/mo_loss', mo_loss)
+    tf.compat.v1.summary.scalar('losses/lo_loss', lo_loss)
+    tf.compat.v1.summary.scalar('losses/total_loss', total_loss)
 
-    optimizer = tf.train.AdamOptimizer()
+    optimizer = tf.compat.v1.train.AdamOptimizer(config.LEARNING_RATE)
     train_op = slim.learning.create_train_op(total_loss, optimizer)
 
-    sess_config = tf.ConfigProto()
+    saver = tf.train.Saver(max_to_keep=0)
+
+    sess_config = tf.compat.v1.ConfigProto()
     sess_config.gpu_options.allow_growth = True
     tf.contrib.slim.learning.train(train_op,
                                    log_dir,
                                    init_fn=init_func,
                                    log_every_n_steps=100,
+                                   saver=saver,
                                    save_summaries_secs=300,
                                    session_config=sess_config,
                                   )
